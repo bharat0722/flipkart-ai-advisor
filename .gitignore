@@ -9,6 +9,7 @@ __pycache__/
 .streamlit/secrets.toml
 /data/raw/*
 !/data/raw/.gitkeep
+/flipkart-products.zip
 /data/processed/*
 !/data/processed/.gitkeep
 /chroma/
