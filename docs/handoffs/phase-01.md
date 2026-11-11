@@ -11,15 +11,15 @@ Establish a reproducible Python repository and produce a traceable electronics c
 | Item | Value |
 | --- | --- |
 | Local repository | `flipkart-ai-advisor` |
-| GitHub repository URL | Pending authenticated repository creation or an existing team repository URL |
-| Stable branch | `main` at `bdcd2381d507bb4084197381898f14fffa3a0b28` |
+| GitHub repository URL | [bharat0722/flipkart-ai-advisor](https://github.com/bharat0722/flipkart-ai-advisor) |
+| Stable branch | `main` |
 | Phase 1 branch | `feat/phase-01-dataset-foundation` |
-| Verified implementation commit | `8b61761a69c11948b17cb7140080ca2ca347352c` |
+| Verified local implementation commit | `8b61761a69c11948b17cb7140080ca2ca347352c` |
 | Handoff revision | This document is tracked on the feature branch. Record the exact reviewed branch tip during sign-off. |
-| Milestone, issues and PR | Drafts in [GitHub workflow](../github_workflow.md). Remote creation, issue numbers and PR URL are pending. |
+| Milestone, issues and PR | [Milestones](https://github.com/bharat0722/flipkart-ai-advisor/milestones) · [Issues](https://github.com/bharat0722/flipkart-ai-advisor/issues) · [Pull requests](https://github.com/bharat0722/flipkart-ai-advisor/pulls) |
 | Accepted release tag | Pending M2 review, QA sign-off and merge. |
 
-The connected GitHub account did not have this repository. The connector could not create a new repository, and GitHub required browser sign-in for creation. The branch and drafts are available locally.
+The verified local commit identifies the original reproduction run. For independent reproduction, use the GitHub Phase 1 PR head and record its exact SHA in the sign-off table.
 
 ## Data source, cleaning and output
 
@@ -34,7 +34,8 @@ The pipeline validates source columns and record widths, filters approved catego
 | `tests/test_preprocess.py` | Nine unit/integration tests using synthetic fixtures and the CLI. |
 | `app.py`, `requirements.txt`, `.env.example`, `.gitignore`, `README.md` | Future app entry point, pinned dependencies, credential-free setup and repository conventions. |
 | `docs/architecture.md`, `docs/data_dictionary.md`, `docs/data_quality.md`, `docs/evaluation.md`, `docs/presentation.md` | Approved architecture, schema, observed data evidence and later-phase notes. |
-| `docs/github_workflow.md`, `docs/handoffs/`, `.github/` | Milestone and issue drafts, PR and issue templates, acceptance process, handoffs and automated checks. |
+| `docs/github_workflow.md`, `docs/handoffs/`, `.github/` | Milestone and issue links, PR and issue templates, acceptance process, handoffs and automated checks. |
+| `docs/PRD.md`, `docs/phase_status.json`, `docs/HANDOFF_PROMPT.md`, `scripts/sync_prd.py`, `AGENTS.md` | Detailed phase requirements, generated status table and instructions for future phase owners. |
 
 ## Reproduce from a clean checkout
 
@@ -77,7 +78,7 @@ Verified environment was Python 3.12.14 on macOS arm64, with Pandas 2.2.3, NumPy
 
 ## Transition to M2
 
-1. **M1:** Link or create the private team repository, publish `main` and the Phase 1 branch, create the milestones and issues, and open the PR. Confirm that published history contains no raw or generated datasets.
+1. **M1:** Give M2 access to the private repository and direct them to the Phase 1 PR. Confirm that published history contains no raw or generated datasets.
 2. **M2:** Reproduce the documented build in a fresh checkout, confirm the hashes, and verify that source references and unknown prices are preserved. Record the result on the PR and in the sign-off table.
 3. **M1 and M2:** Agree that the accessory and networking coverage fits the assignment. If broad laptop or phone comparisons are required, record the dataset decision before indexing. M2 should consume the cleaned CSV fields and preserve product ID and provenance on every future chunk.
 4. **M5:** Review audit evidence and unresolved limitations. Record the outcome before the phase is tagged.
@@ -88,8 +89,8 @@ Verified environment was Python 3.12.14 on macOS arm64, with Pandas 2.2.3, NumPy
 - [x] Real CSV inspected, cleaned and audited within the 150–300 target.
 - [x] Stable IDs, source references, positive known prices and blank unknowns verified.
 - [x] Nine tests pass and local clean-checkout outputs match.
-- [x] Milestone, issue and PR material prepared.
-- [ ] GitHub repository, issues, PR and CI evidence linked.
+- [x] Private GitHub repository, five milestones and initial issues created and linked.
+- [ ] Phase 1 code and project documents published, PR opened and CI evidence linked.
 - [ ] M2 reproduces the result and confirms coverage is suitable.
 - [ ] QA review and acceptance are recorded. Merge and tag follow approval.
 

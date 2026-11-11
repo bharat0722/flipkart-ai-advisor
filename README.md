@@ -2,6 +2,8 @@
 
 University project for an electronics shopping assistant grounded in a historical Flipkart catalogue. Phase 1 builds a reproducible dataset for later retrieval. The audited build retains 288 records across ten categories, with strong accessory coverage and only two laptops.
 
+[Live PRD](docs/PRD.md) · [Architecture and phase plan PDF](docs/Flipkart_AI_Electronics_Advisor_Project_Plan.pdf) · [Copyable handoff prompt](docs/HANDOFF_PROMPT.md)
+
 ## Setup
 
 Run from the repository root using Python 3.12.

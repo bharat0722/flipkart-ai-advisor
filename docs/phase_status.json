@@ -1,0 +1,42 @@
+[
+  {
+    "phase": 1,
+    "title": "Project foundation and dataset engineering",
+    "owner": "M1",
+    "status": "ready_for_review",
+    "handoff": "handoffs/phase-01.md",
+    "evidence": "288 of 20,000 records, 9 passing tests and matching rebuild hashes. M2 review pending."
+  },
+  {
+    "phase": 2,
+    "title": "Embeddings, chunking and vector database",
+    "owner": "M2",
+    "status": "planned",
+    "handoff": null,
+    "evidence": "Depends on Phase 1 acceptance and catalogue scope confirmation."
+  },
+  {
+    "phase": 3,
+    "title": "AI reasoning, grounded answers and safeguards",
+    "owner": "M3",
+    "status": "planned",
+    "handoff": null,
+    "evidence": "Depends on a reproducible retrieval index and evidence contract."
+  },
+  {
+    "phase": 4,
+    "title": "Streamlit application and RAG enhancement",
+    "owner": "M4",
+    "status": "planned",
+    "handoff": null,
+    "evidence": "Depends on grounded answers and stable source metadata."
+  },
+  {
+    "phase": 5,
+    "title": "Testing, evaluation, optimization and presentation",
+    "owner": "M5",
+    "status": "planned",
+    "handoff": null,
+    "evidence": "Depends on a working Streamlit application and documented setup."
+  }
+]
