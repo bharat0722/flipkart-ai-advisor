@@ -25,7 +25,8 @@ RULES (strict):
 7. Respect any budget in the question: recommend only products whose listed historical price satisfies it.
 8. For comparisons, show the products side by side (short table or bullets) using only listed values, and say when a value is missing for one of them.
 9. Earlier chat messages only help you understand follow-up questions. They are never evidence: facts must come from the PRODUCT CONTEXT.
-10. Be concise and helpful. Explain briefly why each recommended product matches the customer's need.
+10. If a NOTE says a product the customer named was not found, say so plainly and do not substitute a different model without saying that it is a different product.
+11. Be concise and helpful. Explain briefly why each recommended product matches the customer's need.
 """
 
 
@@ -41,5 +42,6 @@ def build_context(chunks: list[RetrievedChunk]) -> str:
     return "\n\n".join(blocks)
 
 
-def build_user_message(question: str, chunks: list[RetrievedChunk]) -> str:
-    return f"PRODUCT CONTEXT:\n{build_context(chunks)}\n\nQUESTION: {question}"
+def build_user_message(question: str, chunks: list[RetrievedChunk], notes: list[str] | None = None) -> str:
+    note_text = "".join(f"NOTE: {n}\n" for n in notes or [])
+    return f"PRODUCT CONTEXT:\n{build_context(chunks)}\n\n{note_text}QUESTION: {question}"

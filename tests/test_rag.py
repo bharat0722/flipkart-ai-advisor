@@ -14,7 +14,7 @@ sys.path.insert(0, str(ROOT))
 
 from src import settings  # noqa: E402
 from src.prompts import FALLBACK_MESSAGE, NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_context  # noqa: E402
-from src.query_understanding import extract_budget, extract_categories, understand  # noqa: E402
+from src.query_understanding import extract_budget, extract_categories, extract_comparison_targets, understand  # noqa: E402
 from src.rag_pipeline import LLMUnavailableError, answer_question  # noqa: E402
 from src.retrieval import RetrievedChunk  # noqa: E402
 
@@ -102,6 +102,49 @@ class PromptTests(unittest.TestCase):
         self.assertIn("price: unknown", ctx)
 
 
+class ComparisonTests(unittest.TestCase):
+    def test_targets(self):
+        for text, expected in [
+            ("Compare the TP-LINK TL-WR841N and the iBall 150M router", ["TP-LINK TL-WR841N", "iBall 150M"]),
+            ("compare Wayona 10000mAh vs mobiware mw5b power bank under 1500", ["Wayona 10000mAh", "mobiware mw5b"]),
+            ("TP-LINK TL-WR841N vs iBall 150M?", ["TP-LINK TL-WR841N", "iBall 150M"]),
+            ("what is the difference between Netgear WNR614 and Digisol 150 Mbps in terms of range",
+             ["Netgear WNR614", "Digisol 150 Mbps"]),
+        ]:
+            with self.subTest(text=text):
+                self.assertEqual(extract_comparison_targets(text), expected)
+
+    def test_not_a_comparison(self):
+        for text in ["suggest a wifi router under 1500", "router with 4 ports and a USB", "compare routers"]:
+            with self.subTest(text=text):
+                self.assertEqual(extract_comparison_targets(text), [])
+
+    def test_named_products_are_searched_separately_and_exact_model_wins(self):
+        class ByName(FakeRetriever):
+            def search(self, query, k=5, **kw):
+                self.calls.append((query, k, kw))
+                if "ball" in query.lower():  # the look-alike has the higher similarity score
+                    return [chunk("LOOK", "iBall iB-WRH150N Home Router", score=0.62),
+                            chunk("EXACT", "iBall 150M eXtreme Wireless-N Router", score=0.55)]
+                return [chunk("TP", "TP-LINK TL-WR841N 300Mbps Wireless N Router", score=0.6)]
+        client, retriever = FakeClient("[TP] vs [EXACT]"), ByName([])
+        r = answer_question("Compare the TP-LINK TL-WR841N and the iBall 150M router", retriever=retriever, client=client)
+        self.assertEqual([c[0] for c in retriever.calls], ["TP-LINK TL-WR841N", "iBall 150M"])
+        self.assertEqual(r.sources[0].product_id, "TP")
+        self.assertEqual(r.sources[1].product_id, "EXACT")  # exact name match ranked above the higher-scoring look-alike
+        self.assertNotIn("NOTE:", client.calls[0]["messages"][-1]["content"])
+
+    def test_missing_named_product_is_flagged_to_the_llm(self):
+        class Only(FakeRetriever):
+            def search(self, query, k=5, **kw):
+                return [chunk("OTHER", "Zebronics Totally Different Router", score=0.5)]
+        client = FakeClient("[OTHER]")
+        answer_question("Compare iBall 150M and Zebronics Totally Different Router", retriever=Only([]), client=client)
+        content = client.calls[0]["messages"][-1]["content"]
+        self.assertIn("NOTE: No product in the context clearly matches the customer's \"iBall 150M\".", content)
+        self.assertNotIn("Zebronics Totally Different Router\".", content)
+
+
 class PipelineTests(unittest.TestCase):
     def test_answer_passes_filters_and_context(self):
         retriever, client = FakeRetriever([chunk("P1"), chunk("P2", rank=2)]), FakeClient("Buy [P1] or [P2].")
@@ -170,6 +213,16 @@ class PipelineTests(unittest.TestCase):
             os.environ.pop(settings.LLM_API_KEY_ENV, None)
             if saved is not None:
                 os.environ[settings.LLM_API_KEY_ENV] = saved
+
+    def test_refusal_without_citation_is_not_grounded(self):
+        r = answer_question("iphone camera", retriever=FakeRetriever([chunk("P1", score=0.4)]),
+                            client=FakeClient("I can't answer that from the available product data."))
+        self.assertFalse(r.grounded)
+        self.assertEqual((r.reason, r.cited_product_ids), ("no_support", []))
+
+    def test_only_invented_citations_is_not_grounded(self):
+        r = answer_question("router", retriever=FakeRetriever([chunk("P1")]), client=FakeClient("Try [ZZZ]."))
+        self.assertEqual((r.grounded, r.reason, r.invalid_citations), (False, "no_support", ["ZZZ"]))
 
     def test_empty_question_rejected(self):
         with self.assertRaises(ValueError):

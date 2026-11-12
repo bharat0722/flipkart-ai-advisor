@@ -82,3 +82,45 @@ def extract_categories(text: str) -> list[str]:
 def understand(question: str) -> Constraints:
     lo, hi = extract_budget(question)
     return Constraints(max_price=hi, min_price=lo, categories=extract_categories(question))
+
+
+_COMPARE_LEAD = re.compile(
+    r"\b(?:compare|comparison\s+of|comparing|difference(?:s)?\s+between|diff\s+between)\s+(.+)$", re.I)
+_SEPARATOR = re.compile(r"\s+(?:vs\.?|versus|and|with|or|to)\s+", re.I)
+_VS = re.compile(r"\s+(?:vs\.?|versus)\s+", re.I)
+_TAIL = re.compile(r"\s+(?:in terms of|based on|for|on|regarding|which|what)\b.*$|[,;?.!]+.*$", re.I)
+_BUDGET_TAIL = re.compile(r"\b(?:" + _MAX_WORDS[3:-1] + "|" + _MIN_WORDS[3:-1] + r")\b.*$", re.I)
+_GENERIC_PHRASES = sorted(
+    {tuple(w.split()) for words in CATEGORY_KEYWORDS.values() for w in words} | {(w,) for w in ("model", "models", "product", "products", "one")},
+    key=len, reverse=True)
+
+
+def _clean_target(text: str) -> str:
+    text = _BUDGET_TAIL.sub("", _TAIL.sub("", text)).strip()
+    text = re.sub(r"^(?:the|a|an)\s+", "", text, flags=re.I)
+    words = text.split()
+    changed = True
+    while words and changed:  # "iBall 150M router" -> "iBall 150M"; "mw5b power bank" -> "mw5b"
+        changed = False
+        for phrase in _GENERIC_PHRASES:
+            n = len(phrase)
+            if len(words) > n and [w.lower().strip("-") for w in words[-n:]] == list(phrase):
+                del words[-n:]
+                changed = True
+                break
+    return " ".join(words)
+
+
+def extract_comparison_targets(question: str) -> list[str]:
+    """Product names a customer wants compared, e.g. 'Compare the A and the B' -> ['A', 'B']; [] otherwise."""
+    q = question.strip()
+    m = _COMPARE_LEAD.search(q)
+    if m:
+        parts = _SEPARATOR.split(m.group(1))
+    elif _VS.search(q):
+        parts = _VS.split(q)
+    else:
+        return []
+    targets = [_clean_target(p) for p in parts]
+    targets = [t for t in targets if t]
+    return targets[:3] if len(targets) >= 2 else []

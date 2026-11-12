@@ -22,7 +22,7 @@
     "owner": "M3",
     "status": "in_progress",
     "handoff": "handoffs/phase-03.md",
-    "evidence": "Code, prompt v1, budget/category extraction, fallback and history done. 63 unit tests pass locally (LLM mocked). Real-index demo, F1/F2 re-run and CI NOT RUN yet; Phase 2 acceptance by M3 still pending."
+    "evidence": "Code, prompt v1, budget/category extraction, fallback and history done. 63 unit tests pass locally (LLM mocked). Rebuilt index and real-index suite pass; F1/F2 fixed by category filters (5/5 each). Live Gemini demo run on 8 questions: citations valid, fallbacks work; its 2 defects (comparison picks wrong named product, refusals flagged grounded) fixed and re-verified; client timeout added; prompt v2; 69 tests pass. CI NOT RUN; Phase 2 acceptance by M3 still pending."
   },
   {
     "phase": 4,

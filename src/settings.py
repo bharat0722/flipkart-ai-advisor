@@ -37,7 +37,7 @@ CANDIDATE_MULTIPLIER = 4  # fetch extra chunks so per-product de-duplication sti
 INDEX_SCHEMA_VERSION = 1
 
 # Phase 3: grounded answers
-PROMPT_VERSION = "v1"
+PROMPT_VERSION = "v2"
 HISTORY_MESSAGES = 6          # most recent chat messages passed to the LLM (follow-up understanding only)
 # Weak-evidence gate. Deliberately low: Phase 2 notes that MiniLM scores of ~0.3-0.6 are typical, so the
 # score only catches clearly unrelated queries. The prompt's insufficient-evidence rule does the real work.
@@ -47,3 +47,6 @@ LLM_API_KEY_ENV = "OPENAI_API_KEY"
 LLM_BASE_URL_ENV = "OPENAI_BASE_URL"
 LLM_MODEL_ENV = "LLM_MODEL"
 DEFAULT_LLM_MODEL = "gpt-4o-mini"
+NAMED_MATCH_MIN_OVERLAP = 0.6  # share of a named product's words that must appear in a product name
+NAMED_CANDIDATES = 10  # candidates searched per named product
+LLM_TIMEOUT_SECONDS = 45.0  # per request; the SDK default of 600 s would freeze the UI on a stalled provider
