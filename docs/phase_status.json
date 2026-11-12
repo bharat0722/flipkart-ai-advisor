@@ -11,9 +11,9 @@
     "phase": 2,
     "title": "Embeddings, chunking and vector database",
     "owner": "M2",
-    "status": "planned",
-    "handoff": null,
-    "evidence": "Depends on Phase 1 acceptance and catalogue scope confirmation."
+    "status": "ready_for_review",
+    "handoff": "handoffs/phase-02.md",
+    "evidence": "288 products as 863 chunks in ChromaDB (all-MiniLM-L6-v2, 700/75 chunks); idempotent rebuild, 44 passing tests, 12/14 sample queries pass with 2 documented data-limited failures. M3 reproduction pending."
   },
   {
     "phase": 3,

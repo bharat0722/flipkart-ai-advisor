@@ -37,6 +37,20 @@ python -m compileall -q app.py src tests
 
 `data/processed/electronics.csv` is the input for Phase 2. `data/processed/data_quality.json` contains counts, category distributions, exclusions, missing fields and both file hashes. Use `python -m src.preprocess --help` for path overrides. The observed snapshot is in [the data-quality report](docs/data_quality.md), and the format is in [the data dictionary](docs/data_dictionary.md).
 
+## Phase 2: build and query the retrieval index
+
+Phase 2 embeds the cleaned catalogue with Sentence Transformers `all-MiniLM-L6-v2` and stores it in a persistent ChromaDB collection under `chroma_db/`, which Git ignores. No credentials are needed. The first build downloads the model, about 90 MB.
+
+```sh
+python scripts/build_index.py                       # 288 products → 863 chunks; safe to re-run (no duplicates)
+python -m src.retrieval "laptop for students"       # top-5 evidence with product ID, price and source
+python -m src.retrieval "headphones" --max-price 1000 --json
+python scripts/retrieval_report.py                  # writes docs/retrieval_evidence.md
+RUN_MODEL_TESTS=1 python -m unittest discover -s tests -v
+```
+
+On Linux CI, install CPU-only torch first with `python -m pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu`. On Windows ARM64, use an x64 Python 3.12. See the [Phase 2 build log](docs/phase2_build_log.md) for design, settings, the chunk-size experiment and failure cases. See the [Phase 2 handoff](docs/handoffs/phase-02.md) for acceptance and [retrieval evidence](docs/retrieval_evidence.md) for sample results.
+
 ## Team workflow
 
 Use `main` as the stable branch. Review Phase 1 on `feat/phase-01-dataset-foundation`. See the [GitHub workflow](docs/github_workflow.md) and [Phase 1 handoff](docs/handoffs/phase-01.md) for acceptance and release tagging.

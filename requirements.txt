@@ -5,3 +5,11 @@ python-dateutil==2.9.0.post0
 pytz==2025.2
 six==1.17.0
 tzdata==2025.2
+
+# Phase 2 retrieval index: direct pins; pip resolves their transitive dependencies.
+# On Linux CI, install CPU-only torch first (see .github/workflows/checks.yml).
+# On Windows ARM64, use an x64 Python 3.12 (see docs/phase2_build_log.md).
+torch==2.15.0
+sentence-transformers==6.3.0
+transformers==5.22.2
+chromadb==1.5.9
