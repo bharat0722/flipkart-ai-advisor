@@ -11,9 +11,9 @@ The status table is generated from [phase status](phase_status.json). Each imple
 <!-- BEGIN PHASE STATUS -->
 | Phase | Lead | Status | Handoff | Evidence and next decision |
 | --- | --- | --- | --- | --- |
-| 1. Project foundation and dataset engineering | M1 | Ready for review | [Handoff](handoffs/phase-01.md) | 288 of 20,000 records, 9 passing tests and matching rebuild hashes. M2 review pending. |
-| 2. Embeddings, chunking and vector database | M2 | Ready for review | [Handoff](handoffs/phase-02.md) | 288 products as 863 chunks in ChromaDB (all-MiniLM-L6-v2, 700/75 chunks); idempotent rebuild, 44 passing tests, 12/14 sample queries pass with 2 documented data-limited failures. M3 reproduction pending. |
-| 3. AI reasoning, grounded answers and safeguards | M3 | Planned | Pending | Depends on a reproducible retrieval index and evidence contract. |
+| 1. Project foundation and dataset engineering | M1 | Accepted | [Handoff](handoffs/phase-01.md) | 288 of 20,000 records, 9 passing tests, CI green. M2 independently reproduced the build with matching hashes. M5 QA pending. Accepted by M2 (12 Nov 2026, accept with tracked issues). |
+| 2. Embeddings, chunking and vector database | M2 | Ready for review | [Handoff](handoffs/phase-02.md) | 288 products as 863 chunks (all-MiniLM-L6-v2, 700/75). Idempotent rebuild, 44 passing tests, CI green, 12/14 sample queries pass with 2 documented data-limited failures. Awaiting M3 reproduction. |
+| 3. AI reasoning, grounded answers and safeguards | M3 | Planned | Pending | Unblocked: index and Retriever interface ready. Kickoff prompt in HANDOFF_PROMPT.md. |
 | 4. Streamlit application and RAG enhancement | M4 | Planned | Pending | Depends on grounded answers and stable source metadata. |
 | 5. Testing, evaluation, optimization and presentation | M5 | Planned | Pending | Depends on a working Streamlit application and documented setup. |
 <!-- END PHASE STATUS -->

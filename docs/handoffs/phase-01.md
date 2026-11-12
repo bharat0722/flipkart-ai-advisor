@@ -17,7 +17,7 @@ Establish a reproducible Python repository and produce a traceable electronics c
 | Verified local implementation commit | `8b61761a69c11948b17cb7140080ca2ca347352c` |
 | Handoff revision | This document is tracked on the feature branch. Record the exact reviewed branch tip during sign-off. |
 | Milestone, issues and PR | [Milestones](https://github.com/bharat0722/flipkart-ai-advisor/milestones) · [Issues](https://github.com/bharat0722/flipkart-ai-advisor/issues) · [Pull requests](https://github.com/bharat0722/flipkart-ai-advisor/pulls) |
-| Accepted release tag | Pending M2 review, QA sign-off and merge. |
+| Accepted release tag | Accepted by M2 on 12 November 2026. Tag `phase-1-complete` after M5 QA sign-off. |
 
 The verified local commit identifies the original reproduction run. For independent reproduction, use the GitHub Phase 1 PR head and record its exact SHA in the sign-off table.
 
@@ -74,7 +74,9 @@ Verified environment was Python 3.12.14 on macOS arm64, with Pandas 2.2.3, NumPy
 | Build from a fresh local checkout | PASS | Independently created a new virtual environment in a fresh clone of the implementation commit and extracted the official archive. CSV and JSON matched the first run byte for byte. This was an implementation check by Codex. |
 | Source trace and contract checks | PASS | Verified the schema, unique product IDs, ten unknown prices, and matching `uniq_id`, `pid` and URL at the raw ordinal for all 288 cleaned records. |
 | GitHub Actions | NOT RUN | Workflow file exists. A remote PR and run are pending. |
-| M2 independent reproduction and QA review | NOT RUN | M2 and M5 must record their own evidence and decisions. |
+| GitHub PR and CI | PASS | [PR #6](https://github.com/bharat0722/flipkart-ai-advisor/pull/6) merged to `main` as `be70f63`. Project checks passed on the PR (run #1) and on `main` (run #2). |
+| M2 independent reproduction | PASS | 12 November 2026, fresh clone of `main` at `be70f63` on Windows 11 with x64 CPython 3.12.16, pandas 2.2.3 and numpy 2.3.5. Official Kaggle archive raw SHA-256 `56f8f699…93ad1` matched. `python -m src.preprocess` printed `Retained 288 of 20000 records from 389 candidates.` Cleaned SHA-256 `f13d7836…4bc9` is byte-identical. Nine Phase 1 tests pass. The CSV loaded into Phase 2 with unique IDs, source references and 10 unknown prices preserved as blank. |
+| M5 QA review | NOT RUN | M5 must record their own evidence and decision. |
 
 ## Transition to M2
 
@@ -90,14 +92,14 @@ Verified environment was Python 3.12.14 on macOS arm64, with Pandas 2.2.3, NumPy
 - [x] Stable IDs, source references, positive known prices and blank unknowns verified.
 - [x] Nine tests pass and local clean-checkout outputs match.
 - [x] Private GitHub repository, five milestones and initial issues created and linked.
-- [ ] Phase 1 code and project documents published, PR opened and CI evidence linked.
-- [ ] M2 reproduces the result and confirms coverage is suitable.
+- [x] Phase 1 code and project documents published, PR opened and CI evidence linked. PR #6 was merged, and CI passed.
+- [x] M2 reproduces the result and confirms coverage is suitable. Accessory and networking coverage is accepted for the assignment. Demo questions avoid broad laptop and phone comparisons.
 - [ ] QA review and acceptance are recorded. Merge and tag follow approval.
 
-**Decision pending.** The local snapshot is ready for independent technical review. Remote review and phase acceptance remain open.
+**Decision: Accept with tracked issues (M2, 12 November 2026).** The receiving lead independently reproduced the build. The tracked nonblocking limitation is that the catalogue has 2 laptops and 0 phones. Demo and evaluation questions should use accessory and networking records. M5 QA sign-off is still to be recorded.
 
 | Role | Name | Date | Reviewed commit | Decision or evidence |
 | --- | --- | --- | --- | --- |
 | M1 outgoing lead | Pending | | | Pending |
-| M2 receiving lead | Pending | | | Pending independent reproduction |
+| M2 receiving lead | M2 | 2026-11-12 | `be70f63` | Accept with tracked issues. Independent reproduction matched hashes, counts and tests. |
 | M5 QA reviewer | Pending | | | Pending |

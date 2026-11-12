@@ -11,7 +11,7 @@
 
 ## Prerequisite status
 
-Phase 1 is `ready_for_review` and **not yet accepted** in `docs/phase_status.json`. As part of this work, M2 reproduced Phase 1 independently. The raw SHA-256 `56f8f699…93ad1` and cleaned SHA-256 `f13d7836d8530b4506500738b418e9fe3f54c3711644f04722036aacbd434bc9` match the Phase 1 handoff, with 288 rows. M2 still needs to record the Phase 1 acceptance decision and agree on catalogue scope in issue #4. Phase 2 should merge after that.
+**Phase 1 was accepted by M2 (receiving lead) on 12 November 2026, with tracked issues.** M2 reproduced it independently. The raw SHA-256 `56f8f699…93ad1` and cleaned SHA-256 `f13d7836d8530b4506500738b418e9fe3f54c3711644f04722036aacbd434bc9` match the Phase 1 handoff, with 288 rows. Accessory and networking scope is agreed. See the [Phase 1 sign-off](phase-01.md#acceptance-checklist). M5 QA sign-off for Phase 1 is still open.
 
 ## Snapshot and artifacts
 
@@ -21,7 +21,7 @@ Phase 1 is `ready_for_review` and **not yet accepted** in `docs/phase_status.jso
 | Base | `main` at `be70f63` |
 | Feature branch | `feat/phase-02-retrieval-index` |
 | Issue / milestone | [#5 Phase 2 retrieval index and handoff](https://github.com/bharat0722/flipkart-ai-advisor/issues/5) · [Milestone 2](https://github.com/bharat0722/flipkart-ai-advisor/milestone/2) |
-| Reviewed commit / PR / tag | Record at review. Tag `phase-2-complete` after acceptance. |
+| Reviewed commit / PR / tag | `8e5326b`, pushed directly to `main` at the owner's request, with no PR. Tag `phase-2-complete` after M3 acceptance and M5 QA. |
 | Input | `data/processed/electronics.csv`, 288 products, SHA-256 `f13d7836…4bc9` |
 | Index | `chroma_db/`, collection `flipkart_electronics_v1`, cosine. Not committed. |
 | Model | `sentence-transformers/all-MiniLM-L6-v2`, 384 dimensions, normalized |
@@ -85,7 +85,7 @@ The verified environment was Windows 11 ARM64 running x64 CPython 3.12.16 under 
 | Budget queries | All results have known prices within the limit | Q13 (≤1000) and Q14 (≤1500) respected | PASS | M2 |
 | Unit and integration tests | All pass | `Ran 44 tests … OK` with and without `RUN_MODEL_TESTS=1` | PASS | M2 |
 | Compile | Exit 0 | Exit 0 | PASS | M2 |
-| GitHub Actions | Green | Pending PR | NOT RUN | M2 |
+| GitHub Actions | Green | [Project checks run #3](https://github.com/bharat0722/flipkart-ai-advisor/actions) on `8e5326b` succeeded in 1m 25s, and Update live PRD run #2 succeeded | PASS | M2 |
 | M3 independent reproduction | Rebuild or open index and run retrieval | Pending | NOT RUN | M3 |
 | QA review | Decision recorded | Pending | NOT RUN | M5 |
 
@@ -96,7 +96,7 @@ The verified environment was Windows 11 ARM64 running x64 CPython 3.12.16 under 
 | F1 and F2: semantically similar categories (home theatre and chargers) outrank sparse categories | Nonblocking | 1–2 of the top five are off-category for speaker and power-bank queries. The correct item still ranks #1. | M3: detect the product type in the query and pass `categories=`. M4: Hybrid RAG keyword boost. |
 | Catalogue has 2 laptops and 0 phones | Nonblocking, known since Phase 1 | No broad laptop or phone comparisons are possible | M1, M2 and M3: choose demo questions from accessory and networking records |
 | Native Windows ARM64 cannot install the pinned stack | Nonblocking | Setup friction on ARM laptops | Use x64 Python 3.12, as in build log §4 |
-| Phase 1 acceptance not recorded | Process | Phase 2 merge order | M2: record the decision in issue #4 |
+| No PR review before the merge to `main` | Process | Skipped the one-review rule in `github_workflow.md` | M3: review commit `8e5326b` as part of the reproduction; comment on issue #5 |
 
 **Receiving phase (M3):** connect an LLM to `Retriever.search()`. First tasks:
 
@@ -113,10 +113,10 @@ Interface constraints: `price is None` means unknown. Do not use raw cosine scor
 - [ ] Reviewer recorded evidence, decision and any outstanding items.
 - [ ] The reviewed work was merged and the accepted snapshot tagged.
 
-Decision: **Pending.** Ready for M3 reproduction and M5 review.
+Decision: **Outgoing lead signed. Awaiting M3 acceptance.** M2 has completed the implementation, evidence and CI. Phase 2 closes when M3 independently reproduces the work and records a decision below. M5 then records QA, and the snapshot is tagged `phase-2-complete`.
 
 | Role | Name | Date | Commit | Decision or evidence |
 | --- | --- | --- | --- | --- |
-| Outgoing lead (M2) | Pending | 2026-11-12 | Record at PR | Ready for review |
+| Outgoing lead (M2) | M2 | 2026-11-12 | `8e5326b` | Implementation complete. 44 tests pass locally, and CI is green. Handed off to M3. |
 | Receiving lead (M3) | Pending | | | Pending independent reproduction |
 | QA reviewer (M5) | Pending | | | Pending |

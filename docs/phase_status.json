@@ -3,9 +3,10 @@
     "phase": 1,
     "title": "Project foundation and dataset engineering",
     "owner": "M1",
-    "status": "ready_for_review",
+    "status": "accepted",
     "handoff": "handoffs/phase-01.md",
-    "evidence": "288 of 20,000 records, 9 passing tests and matching rebuild hashes. M2 review pending."
+    "evidence": "288 of 20,000 records, 9 passing tests, CI green. M2 independently reproduced the build with matching hashes. M5 QA pending.",
+    "accepted_by": "M2 (12 Nov 2026, accept with tracked issues)"
   },
   {
     "phase": 2,
@@ -13,7 +14,7 @@
     "owner": "M2",
     "status": "ready_for_review",
     "handoff": "handoffs/phase-02.md",
-    "evidence": "288 products as 863 chunks in ChromaDB (all-MiniLM-L6-v2, 700/75 chunks); idempotent rebuild, 44 passing tests, 12/14 sample queries pass with 2 documented data-limited failures. M3 reproduction pending."
+    "evidence": "288 products as 863 chunks (all-MiniLM-L6-v2, 700/75). Idempotent rebuild, 44 passing tests, CI green, 12/14 sample queries pass with 2 documented data-limited failures. Awaiting M3 reproduction."
   },
   {
     "phase": 3,
@@ -21,7 +22,7 @@
     "owner": "M3",
     "status": "planned",
     "handoff": null,
-    "evidence": "Depends on a reproducible retrieval index and evidence contract."
+    "evidence": "Unblocked: index and Retriever interface ready. Kickoff prompt in HANDOFF_PROMPT.md."
   },
   {
     "phase": 4,
