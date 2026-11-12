@@ -13,3 +13,7 @@ torch==2.15.0
 sentence-transformers==6.3.0
 transformers==5.22.2
 chromadb==1.5.9
+
+# Phase 3 grounded answers: OpenAI-compatible LLM client and .env loading.
+openai==3.49.0
+python-dotenv==1.2.4

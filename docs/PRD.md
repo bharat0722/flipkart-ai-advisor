@@ -13,7 +13,7 @@ The status table is generated from [phase status](phase_status.json). Each imple
 | --- | --- | --- | --- | --- |
 | 1. Project foundation and dataset engineering | M1 | Accepted | [Handoff](handoffs/phase-01.md) | 288 of 20,000 records, 9 passing tests, CI green. M2 independently reproduced the build with matching hashes. M5 QA pending. Accepted by M2 (12 Nov 2026, accept with tracked issues). |
 | 2. Embeddings, chunking and vector database | M2 | Ready for review | [Handoff](handoffs/phase-02.md) | 288 products as 863 chunks (all-MiniLM-L6-v2, 700/75). Idempotent rebuild, 44 passing tests, CI green, 12/14 sample queries pass with 2 documented data-limited failures. Awaiting M3 reproduction. |
-| 3. AI reasoning, grounded answers and safeguards | M3 | Planned | Pending | Unblocked: index and Retriever interface ready. Kickoff prompt in HANDOFF_PROMPT.md. |
+| 3. AI reasoning, grounded answers and safeguards | M3 | In progress | [Handoff](handoffs/phase-03.md) | Code, prompt v1, budget/category extraction, fallback and history done. 63 unit tests pass locally (LLM mocked). Rebuilt index and real-index suite pass; F1/F2 fixed by category filters (5/5 each). Live Gemini demo run on 8 questions: citations valid, fallbacks work; its 2 defects (comparison picks wrong named product, refusals flagged grounded) fixed and re-verified; client timeout added; prompt v2; 69 tests pass. CI NOT RUN; Phase 2 acceptance by M3 still pending. |
 | 4. Streamlit application and RAG enhancement | M4 | Planned | Pending | Depends on grounded answers and stable source metadata. |
 | 5. Testing, evaluation, optimization and presentation | M5 | Planned | Pending | Depends on a working Streamlit application and documented setup. |
 <!-- END PHASE STATUS -->
