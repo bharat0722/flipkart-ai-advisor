@@ -2,6 +2,7 @@
 
 import sys
 import unittest
+from dataclasses import replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,7 +12,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 import build_display_data  # noqa: E402
 from src.retrieval import RetrievedChunk  # noqa: E402
-from src.ui_helpers import (REASON_LABELS, cache_key, format_price, format_rating, number_citations,  # noqa: E402
+from src.ui_helpers import (PRICE_STOPS, REASON_LABELS, cache_key, filter_summary, format_price,  # noqa: E402
+                            format_rating, format_rupees, number_citations, price_stop_label, product_card_html,
                             source_numbers)
 
 
@@ -53,6 +55,42 @@ class DisplayTests(unittest.TestCase):
         self.assertEqual(format_rating(4.2), "★ 4.2 / 5")
         self.assertEqual(format_rating(5.0), "★ 5 / 5")
         self.assertEqual(format_rating(None), "No rating")
+
+    def test_card_price(self):
+        self.assertEqual(format_rupees(1299.0), "₹1,299")
+        self.assertEqual(format_rupees(None), "Price unknown")
+
+
+class FilterDisplayTests(unittest.TestCase):
+    def test_summary(self):
+        self.assertEqual(filter_summary(500.0, 2000.0, ["Mice"]), "₹500 – ₹2,000 · Mice")
+        self.assertEqual(filter_summary(None, 1000.0, []), "Under ₹1,000")
+        self.assertEqual(filter_summary(250.0, None, []), "Above ₹250")
+        self.assertEqual(filter_summary(None, None, []), "")
+
+    def test_price_stops(self):
+        self.assertEqual(price_stop_label(PRICE_STOPS[-1]), "No limit")
+        self.assertEqual(price_stop_label(5000), "₹5,000")
+        self.assertEqual(PRICE_STOPS, sorted(PRICE_STOPS))
+
+
+class ProductCardTests(unittest.TestCase):
+    def test_card_shows_number_price_rating_and_historical_label(self):
+        card = product_card_html(2, chunk("P-aaa"), "https://img/x.jpeg", 4.2)
+        for part in ('class="pcard-num">2<', "₹999", "4.2 ★", 'src="https://img/x.jpeg"', "2015-16 catalogue price"):
+            self.assertIn(part, card)
+
+    def test_catalogue_text_is_escaped(self):
+        c = replace(chunk("P-aaa"), name="<script>x</script>", source_url='https://a/"onmouseover="y')
+        card = product_card_html(1, c, None, None)
+        self.assertNotIn("<script>", card)
+        self.assertNotIn('"onmouseover="', card)
+
+    def test_card_without_link_image_or_rating(self):
+        card = product_card_html(1, chunk("P-aaa"), None, None)
+        self.assertNotIn("<a ", card)
+        self.assertIn("No image", card)
+        self.assertIn("No ratings", card)
 
 
 class CacheKeyTests(unittest.TestCase):

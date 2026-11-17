@@ -105,6 +105,20 @@ def understand(question: str) -> Constraints:
                        connectivity=extract_connectivity(question))
 
 
+def narrow(constraints: Constraints, filters: Constraints) -> Constraints | None:
+    """Combine a question's constraints with the user's filters; both must hold. The tighter price bound wins
+    and categories intersect. None means the two cannot both be met (e.g. a router question, headphones filter)."""
+    max_price = min((p for p in (constraints.max_price, filters.max_price) if p is not None), default=None)
+    min_price = max((p for p in (constraints.min_price, filters.min_price) if p is not None), default=None)
+    categories = constraints.categories
+    if filters.categories:
+        categories = [c for c in filters.categories if not constraints.categories or c in constraints.categories]
+        if not categories:
+            return None
+    return Constraints(max_price=max_price, min_price=min_price, categories=categories,
+                       connectivity=constraints.connectivity)
+
+
 def is_follow_up(question: str) -> bool:
     """In a conversation, a question that names no product category continues the current topic
     ("which is the best?", "is the zebie good?"). Naming a category starts a new one."""

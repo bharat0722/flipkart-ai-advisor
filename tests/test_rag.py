@@ -14,8 +14,9 @@ sys.path.insert(0, str(ROOT))
 
 from src import settings  # noqa: E402
 from src.prompts import FALLBACK_MESSAGE, NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_context  # noqa: E402
-from src.query_understanding import (extract_budget, extract_categories, extract_comparison_targets,  # noqa: E402
-                                     extract_connectivity, is_follow_up, understand)
+from src.query_understanding import (Constraints, extract_budget, extract_categories,  # noqa: E402
+                                     extract_comparison_targets, extract_connectivity, is_follow_up, narrow,
+                                     understand)
 from src.rag_pipeline import LLMUnavailableError, answer_question  # noqa: E402
 from src.retrieval import RetrievedChunk  # noqa: E402
 
@@ -125,6 +126,25 @@ class CategoryTests(unittest.TestCase):
         self.assertEqual((c.max_price, c.min_price, c.categories), (1500, None, ["Power Banks"]))
 
 
+class NarrowTests(unittest.TestCase):
+    def test_tighter_price_bound_wins(self):
+        c = narrow(Constraints(max_price=1500.0), Constraints(max_price=1000.0, min_price=200.0))
+        self.assertEqual((c.min_price, c.max_price), (200.0, 1000.0))
+
+    def test_filter_categories_apply_when_question_names_none(self):
+        self.assertEqual(narrow(Constraints(), Constraints(categories=["Mice"])).categories, ["Mice"])
+
+    def test_categories_intersect_or_conflict(self):
+        question = Constraints(categories=["Routers & Networking"])
+        self.assertEqual(narrow(question, Constraints(categories=["Mice", "Routers & Networking"])).categories,
+                         ["Routers & Networking"])
+        self.assertIsNone(narrow(question, Constraints(categories=["Mice"])))
+
+    def test_connectivity_is_kept(self):
+        self.assertEqual(narrow(Constraints(connectivity="wireless"), Constraints(max_price=900.0)).connectivity,
+                         "wireless")
+
+
 class PromptTests(unittest.TestCase):
     def test_grounding_rules_present(self):
         for phrase in ["ONLY from the PRODUCT CONTEXT", "Never invent", "can't answer that from the available product data",
@@ -215,6 +235,22 @@ class PipelineTests(unittest.TestCase):
         r = answer_question("router under 10", retriever=FakeRetriever([]), client=client)
         self.assertEqual((r.reason, r.answer), ("no_budget_match", NO_BUDGET_MATCH_MESSAGE))
         self.assertEqual(client.calls, [])
+
+    def test_user_filters_narrow_the_question(self):
+        retriever = FakeRetriever([chunk("P1", price=900.0)])
+        filters = Constraints(max_price=1000.0, min_price=500.0, categories=["Routers & Networking", "Mice"])
+        answer_question("Suggest a router under 1,500", retriever=retriever, client=FakeClient(), k=8, filters=filters)
+        query, k, kwargs = retriever.calls[0]
+        self.assertEqual(k, 8)
+        self.assertEqual(kwargs, {"max_price": 1000.0, "min_price": 500.0,
+                                  "categories": ["Routers & Networking"], "connectivity": None})
+
+    def test_conflicting_category_filter_falls_back_without_llm(self):
+        client, retriever = FakeClient(), FakeRetriever([chunk("P1")])
+        r = answer_question("Suggest a router", retriever=retriever, client=client,
+                            filters=Constraints(categories=["Headphones & Earphones"]))
+        self.assertEqual(r.reason, "no_evidence")
+        self.assertEqual((client.calls, retriever.calls), ([], []))
 
     def test_weak_evidence_falls_back_without_llm(self):
         client = FakeClient()

@@ -16,7 +16,7 @@ from dataclasses import asdict, dataclass, field
 
 from src import settings
 from src.prompts import FALLBACK_MESSAGE, NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_user_message
-from src.query_understanding import Constraints, extract_comparison_targets, is_follow_up, understand
+from src.query_understanding import Constraints, extract_comparison_targets, is_follow_up, narrow, understand
 from src.retrieval import RetrievedChunk, Retriever
 
 _CITATION = re.compile(r"\[([A-Za-z0-9_\-]+)\]")
@@ -129,7 +129,9 @@ def _call_llm(client, messages: list[dict]) -> str:
 
 
 def answer_question(question: str, history: list[dict] | None = None, *, retriever: Retriever | None = None,
-                    client=None, k: int = settings.DEFAULT_TOP_K) -> RagResult:
+                    client=None, k: int = settings.DEFAULT_TOP_K, filters: Constraints | None = None) -> RagResult:
+    """``filters`` are the user's own price and category limits (the app sidebar). They apply on top of
+    whatever the question asks for, so a question can narrow them but never widen them."""
     question = (question or "").strip()
     if not question:
         raise ValueError("Question must not be empty.")
@@ -142,6 +144,11 @@ def answer_question(question: str, history: list[dict] | None = None, *, retriev
             min_price=constraints.min_price if constraints.has_price_limit else earlier.min_price,
             categories=constraints.categories or earlier.categories,
             connectivity=constraints.connectivity or earlier.connectivity)
+    if filters is not None:
+        narrowed = narrow(constraints, filters)
+        if narrowed is None:
+            return RagResult(FALLBACK_MESSAGE, False, "no_evidence", constraints=constraints)
+        constraints = narrowed
     retriever = retriever or Retriever()
     targets = extract_comparison_targets(question)
     notes: list[str] = []
