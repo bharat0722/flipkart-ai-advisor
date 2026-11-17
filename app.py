@@ -85,7 +85,8 @@ def render_product_cards(result: dict) -> None:
             st.markdown(f'**[{numbers[pid]}]** <a href="{url}" target="_blank">{name}</a>' if url else
                         f"**[{numbers[pid]}]** {name}", unsafe_allow_html=True)
             st.markdown(f"**{format_price(s.price)}** · {format_rating(extra.get('rating'))}")
-            st.caption(f"{s.category} · {s.brand or 'Unknown brand'}")
+            st.caption(f"{s.category} · {s.brand or 'Unknown brand'}"
+                       + (" · 🧪 synthetic demo record" if s.source_ref == "SYNTHETIC" else ""))
 
 
 def render_sources(result: dict) -> None:
@@ -99,7 +100,7 @@ def render_sources(result: dict) -> None:
             st.caption(f"{s.category} · {s.brand or 'Unknown brand'} · **{format_price(s.price)}** · "
                        f"relevance {s.score:.2f}")
             st.text(s.text[:600] + ("..." if len(s.text) > 600 else ""))
-            st.caption(f"Source: `{s.source_ref}`")
+            st.caption(f"Source: `{s.source_ref}`" + (" (invented demo record)" if s.source_ref == "SYNTHETIC" else ""))
 
 
 def render_assistant(msg: dict) -> None:

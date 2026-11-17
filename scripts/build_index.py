@@ -36,9 +36,15 @@ def sha256(path: Path) -> str:
 
 def build_index(input_path: Path, index_dir: Path, collection_name: str, *, reset: bool = False,
                 max_record_chars: int = settings.MAX_RECORD_CHARS, chunk_size: int = settings.CHUNK_SIZE,
-                overlap: int = settings.CHUNK_OVERLAP, embedder=None) -> dict:
+                overlap: int = settings.CHUNK_OVERLAP, embedder=None, synthetic_path: Path | None = None) -> dict:
     started = time.perf_counter()
     products = load_products(input_path)
+    if synthetic_path is not None:
+        extra = load_products(synthetic_path)
+        clash = {p.product_id for p in products} & {p.product_id for p in extra}
+        if clash:
+            raise ValueError(f"Synthetic product IDs clash with the catalogue: {sorted(clash)[:3]}")
+        products = products + extra
     chunk_settings = {"max_record_chars": max_record_chars, "size": chunk_size, "overlap": overlap}
     chunks = chunk_products(products, max_record_chars=max_record_chars, chunk_size=chunk_size, overlap=overlap)
 
@@ -60,6 +66,9 @@ def build_index(input_path: Path, index_dir: Path, collection_name: str, *, rese
         "index_schema_version": settings.INDEX_SCHEMA_VERSION,
         "input_csv": input_path.resolve().relative_to(ROOT).as_posix() if input_path.resolve().is_relative_to(ROOT) else str(input_path),
         "input_sha256": sha256(input_path),
+        "synthetic_csv": synthetic_path.resolve().relative_to(ROOT).as_posix() if synthetic_path else None,
+        "synthetic_sha256": sha256(synthetic_path) if synthetic_path else None,
+        "synthetic_products": sum(1 for p in products if p.source_ref == "SYNTHETIC"),
         "collection": collection_name,
         "index_dir": index_dir.resolve().relative_to(ROOT).as_posix() if index_dir.resolve().is_relative_to(ROOT) else str(index_dir),
         "distance": settings.DISTANCE_METRIC,
@@ -91,12 +100,16 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--max-record-chars", type=int, default=settings.MAX_RECORD_CHARS)
     parser.add_argument("--chunk-size", type=int, default=settings.CHUNK_SIZE)
     parser.add_argument("--overlap", type=int, default=settings.CHUNK_OVERLAP)
+    parser.add_argument("--synthetic", type=Path, default=settings.SYNTHETIC_CSV,
+                        help="Labelled synthetic records added to the index when the file exists.")
+    parser.add_argument("--no-synthetic", action="store_true", help="Index only the real catalogue.")
     parser.add_argument("--reset", action="store_true", help="Delete the collection before building.")
     args = parser.parse_args(argv)
     try:
         manifest = build_index(
             args.input, args.index_dir, args.collection, reset=args.reset,
             max_record_chars=args.max_record_chars, chunk_size=args.chunk_size, overlap=args.overlap,
+            synthetic_path=None if args.no_synthetic or not args.synthetic.is_file() else args.synthetic,
         )
     except (FileNotFoundError, ValueError, RuntimeError) as exc:
         print(f"Index build failed: {exc}", file=sys.stderr)

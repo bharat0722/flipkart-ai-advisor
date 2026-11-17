@@ -22,6 +22,9 @@ REQUIRED_COLUMNS = {
 }
 
 
+SYNTHETIC_SOURCE = "SYNTHETIC"  # source_ref of invented demo records
+
+
 @dataclass(frozen=True)
 class Product:
     product_id: str
@@ -105,15 +108,22 @@ def format_price(price: float | None) -> str:
     return f"INR {price:,.0f}" if float(price).is_integer() else f"INR {price:,.2f}"
 
 
+def is_synthetic(product: Product) -> bool:
+    return product.source_ref == SYNTHETIC_SOURCE
+
+
 def identity_header(product: Product) -> str:
     """Identity lines repeated on every chunk of a product."""
-    return "\n".join([
+    lines = [
         f"Product: {product.name}",
         f"Product ID: {product.product_id}",
         f"Category: {product.category}",
         f"Brand: {product.brand or 'unknown'}",
         f"Historical price (2015-16 catalogue): {format_price(product.price)}",
-    ])
+    ]
+    if is_synthetic(product):
+        lines.append("Record type: SYNTHETIC demo record, invented, not a real Flipkart listing")
+    return "\n".join(lines)
 
 
 def document_body(product: Product) -> str:

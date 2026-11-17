@@ -51,6 +51,8 @@ RUN_MODEL_TESTS=1 python -m unittest discover -s tests -v
 
 On Linux CI, install CPU-only torch first with `python -m pip install torch==2.15.0 --index-url https://download.pytorch.org/whl/cpu`. On Windows ARM64, use an x64 Python 3.12. See the [Phase 2 build log](docs/phase2_build_log.md) for design, settings, the chunk-size experiment and failure cases. See the [Phase 2 handoff](docs/handoffs/phase-02.md) for acceptance and [retrieval evidence](docs/retrieval_evidence.md) for sample results.
 
+Phase 2 also indexes 18 labelled synthetic records (laptops, mice, keyboards, pen drives, power banks) that fill categories the Kaggle sample barely covers; see [synthetic data](docs/synthetic_data.md). Add `--no-synthetic` to `build_index.py` to leave them out.
+
 ## Phase 4: run the Streamlit app
 
 The app answers from the Phase 2 index through the Phase 3 pipeline. It needs the cleaned CSV and index from the steps above, product images and ratings, and an LLM key.

@@ -51,6 +51,8 @@ def build(raw_csv: Path = RAW_CSV, clean_csv: Path = CLEAN_CSV) -> dict[str, dic
     raw = pd.read_csv(raw_csv, dtype=str).set_index("uniq_id")
     out = {}
     for product_id, uniq_id in zip(clean["product_id"], clean["source_uniq_id"]):
+        if uniq_id not in raw.index:  # synthetic records have no Flipkart row, image or rating
+            continue
         row = raw.loc[uniq_id]
         out[product_id] = {"image_url": image_url(row["image"]), "rating": rating(row["overall_rating"])}
     return out

@@ -27,7 +27,8 @@ RULES (strict):
 8. For comparisons, show the products side by side (short table or bullets) using only listed values, and say when a value is missing for one of them.
 9. Earlier chat messages only help you understand follow-up questions. They are never evidence: facts must come from the PRODUCT CONTEXT.
 10. If a NOTE says a product the customer named was not found, say so plainly and do not substitute a different model without saying that it is a different product.
-11. Be concise and helpful. Explain briefly why each recommended product matches the customer's need.
+11. A product whose context says "Record type: SYNTHETIC" is an invented demo record, not a real Flipkart listing. Whenever you mention one, say it is a synthetic demo record.
+12. Be concise and helpful. Explain briefly why each recommended product matches the customer's need.
 """
 
 
