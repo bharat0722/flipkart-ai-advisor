@@ -1,6 +1,6 @@
 # Flipkart AI Electronics Advisor
 
-University project for an electronics shopping assistant grounded in a historical Flipkart catalogue. Phase 1 builds a reproducible dataset for later retrieval. The audited build retains 288 records across ten categories, with strong accessory coverage and only two laptops.
+University project for an electronics shopping assistant grounded in a historical Flipkart catalogue. Phase 1 builds a reproducible dataset for later retrieval. The audited Phase 1 build retained 288 records across ten categories. The scope has since been widened to every electronics, appliance and device-accessory category in the source: 1,993 records across 28 categories. The source still has only two laptops and no phones.
 
 [Live PRD](docs/PRD.md) · [Architecture and phase plan PDF](docs/Flipkart_AI_Electronics_Advisor_Project_Plan.pdf) · [Copyable handoff prompt](docs/HANDOFF_PROMPT.md)
 
@@ -42,7 +42,7 @@ python -m compileall -q app.py src tests
 Phase 2 embeds the cleaned catalogue with Sentence Transformers `all-MiniLM-L6-v2` and stores it in a persistent ChromaDB collection under `chroma_db/`, which Git ignores. No credentials are needed. The first build downloads the model, about 90 MB.
 
 ```sh
-python scripts/build_index.py                       # 288 products → 863 chunks; safe to re-run (no duplicates)
+python scripts/build_index.py                       # 1993 products → 4050 chunks; safe to re-run (no duplicates)
 python -m src.retrieval "laptop for students"       # top-5 evidence with product ID, price and source
 python -m src.retrieval "headphones" --max-price 1000 --json
 python scripts/retrieval_report.py                  # writes docs/retrieval_evidence.md
@@ -56,7 +56,7 @@ On Linux CI, install CPU-only torch first with `python -m pip install torch==2.1
 The app answers from the Phase 2 index through the Phase 3 pipeline. It needs the cleaned CSV and index from the steps above, product images and ratings, and an LLM key.
 
 ```sh
-python scripts/build_display_data.py                # images and ratings for the product cards (288 products, 91 rated)
+python scripts/build_display_data.py                # images and ratings for the product cards (1993 products, 267 rated)
 cp .env.example .env                                # then set OPENAI_API_KEY, OPENAI_BASE_URL and LLM_MODEL
 streamlit run app.py                                # opens http://localhost:8501
 ```

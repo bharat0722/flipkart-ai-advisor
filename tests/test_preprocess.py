@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.preprocess import OUTPUT_COLUMNS, build, read_source
+from src.preprocess import NETWORK_LIMIT, OUTPUT_COLUMNS, build, read_source
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -75,10 +75,11 @@ class PreprocessTests(unittest.TestCase):
         frame, report = self.run_build(
             fixture("router", category=ROUTERS + " >> Example Wireless Router"),
             fixture("case", category="Mobiles & Accessories >> Tablet Accessories >> Cases & Covers"),
+            fixture("shirt", category="Clothing >> Men's Clothing >> T-Shirts"),
             fixture("lookalike", category="Clothing >> Network Components >> Routers"),
             fixture("badpath", product_category_tree="Computers >> Network Components >> Routers"),
         )
-        self.assertEqual(frame.category.tolist(), ["Routers & Networking"])
+        self.assertEqual(frame.category.tolist(), ["Phone & Tablet Cases", "Routers & Networking"])
         self.assertEqual(report["excluded_rows_by_reason"]["outside_category_scope"], 3)
         self.assertEqual(report["raw_unparseable_category_paths"], 1)
 
@@ -130,15 +131,15 @@ class PreprocessTests(unittest.TestCase):
         self.assertEqual(report["excluded_rows_by_reason"]["insufficient_description_and_specs"], 2)
 
     def test_repeated_build_is_byte_identical_and_reports_scope(self):
-        rows = [fixture(str(i)) for i in range(105)]
+        rows = [fixture(str(i)) for i in range(NETWORK_LIMIT + 5)]
         rows.append(fixture("headphones", category="Gaming >> Gaming Accessories >> Headphones (With Mic)"))
         _, report = self.run_build(*rows)
         expected = self.output.read_bytes(), self.report.read_bytes()
         build(self.input, self.output, self.report)
         self.assertEqual((self.output.read_bytes(), self.report.read_bytes()), expected)
-        self.assertEqual(report["cleaned_rows"], 101)
+        self.assertEqual(report["cleaned_rows"], NETWORK_LIMIT + 1)
         self.assertEqual(report["excluded_rows_by_reason"]["curation_limit"], 5)
-        self.assertFalse(report["target_minimum_met"])
+        self.assertTrue(report["target_minimum_met"])
         self.assertEqual(report["raw_rows"], report["cleaned_rows"] + sum(report["excluded_rows_by_reason"].values()))
 
     def test_empty_and_malformed_csv(self):

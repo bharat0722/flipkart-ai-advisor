@@ -16,8 +16,10 @@ import pandas as pd
 
 DATASET = "PromptCloudHQ/flipkart-products"
 DATASET_VERSION = 1
-TARGET_MIN, TARGET_MAX = 150, 300
-NETWORK_LIMIT = 100
+# Widened from 150-300 records to the whole electronics and accessories scope of the source. The router cap
+# now keeps every usable router; it stays so one class can never crowd out the rest if the source grows.
+TARGET_MIN, TARGET_MAX = 150, 2_500
+NETWORK_LIMIT = 250
 REQUIRED_INPUT = {
     "uniq_id", "pid", "product_url", "product_name", "product_category_tree",
     "description", "brand", "discounted_price", "product_specifications",
@@ -52,6 +54,59 @@ CATEGORY_PATHS = {
     "Gaming >> Gaming Accessories >> Headphones (With Mic)": "Headphones & Earphones",
     "Gaming >> Gaming Accessories >> Mouse": "Mice",
     "Gaming >> Gaming Accessories >> Gaming Speakers": "Speakers",
+    # Widened scope: the rest of the source's electronics, appliances and device accessories.
+    # Source labels are misleading in places, so categories follow what the products are: the
+    # "Tablet Accessories >> Cases & Covers" path also holds phone covers, and the automotive
+    # "Car Electronics & Accessories" path is almost entirely phone mounts.
+    "Mobiles & Accessories >> Tablet Accessories >> Cases & Covers": "Phone & Tablet Cases",
+    "Computers >> Tablet Accessories >> Cases & Covers": "Phone & Tablet Cases",
+    "Mobiles & Accessories >> Mobile Accessories >> Mobile Pouches": "Phone & Tablet Cases",
+    "Mobiles & Accessories >> Mobile Accessories >> Mobile Body Panels": "Phone & Tablet Cases",
+    "Mobiles & Accessories >> Mobile Accessories >> Screen Protectors": "Screen Protectors",
+    "Mobiles & Accessories >> Mobile Accessories >> Screen Guards": "Screen Protectors",
+    "Mobiles & Accessories >> Tablet Accessories >> Screen Protectors": "Screen Protectors",
+    "Mobiles & Accessories >> Mobile Accessories >> Cables": "Cables & Connectors",
+    "Mobiles & Accessories >> Mobile Accessories >> Mobile Cables": "Cables & Connectors",
+    "Mobiles & Accessories >> Mobile Accessories >> OTG Adapters": "Cables & Connectors",
+    "Mobiles & Accessories >> Mobile Accessories >> SIM Adapters": "Cables & Connectors",
+    "Computers >> Network Components >> Cables": "Cables & Connectors",
+    "Gaming >> Gaming Accessories >> Cables & Adapters": "Cables & Connectors",
+    "Gaming >> Gaming Accessories >> TV-Out Cable": "Cables & Connectors",
+    "Mobiles & Accessories >> Mobile Accessories >> Car Accessories": "Phone Mounts & Holders",
+    "Mobiles & Accessories >> Mobile Accessories >> Mobile Holders": "Phone Mounts & Holders",
+    "Automotive >> Accessories & Spare parts >> Car Electronics & Accessories": "Phone Mounts & Holders",
+    "Mobiles & Accessories >> Mobile Accessories >> Earphone Cable Organizers": "Mobile Accessories",
+    "Mobiles & Accessories >> Mobile Accessories >> Selfie Sticks": "Mobile Accessories",
+    "Mobiles & Accessories >> Mobile Accessories >> Mobile Phone Lens": "Mobile Accessories",
+    "Mobiles & Accessories >> Mobile Accessories >> Screen Expander For Phones": "Mobile Accessories",
+    "Mobiles & Accessories >> Mobile Accessories >> Styling & Maintenance": "Mobile Accessories",
+    "Mobiles & Accessories >> Mobile Accessories >> Mobile Displays": "Mobile Accessories",
+    "Computers >> Laptop Accessories >> Batteries": "Batteries",
+    "Mobiles & Accessories >> Mobile Accessories >> Batteries": "Batteries",
+    "Computers >> Laptop Accessories >> USB Gadgets": "USB Gadgets",
+    "Computers >> Laptop Accessories >> Computer Accessories Combos": "Laptop Accessories",
+    "Computers >> Laptop Accessories >> Mouse Pads": "Laptop Accessories",
+    "Computers >> Laptop Accessories >> Anti Dust Plugs": "Laptop Accessories",
+    "Computers >> Laptop Accessories >> Laptop Bags": "Laptop Accessories",
+    "Computers >> Laptop Accessories >> Bags": "Laptop Accessories",
+    "Computers >> Laptop Accessories >> Cleaning Kits": "Laptop Accessories",
+    "Gaming >> Gaming Accessories >> Mousepads": "Laptop Accessories",
+    "Computers >> Computer Components": "Computer Parts & Peripherals",
+    "Computers >> Computer Peripherals": "Computer Parts & Peripherals",
+    "Gaming >> Gaming Components": "Computer Parts & Peripherals",
+    "Cameras & Accessories >> Camera Accessories": "Camera Accessories",
+    "Health & Personal Care Appliances >> Personal Care Appliances >> Trimmers": "Grooming Appliances",
+    "Health & Personal Care Appliances >> Personal Care Appliances >> Shavers": "Grooming Appliances",
+    "Health & Personal Care Appliances >> Personal Care Appliances >> Hair Dryers": "Grooming Appliances",
+    "Health & Personal Care Appliances >> Personal Care Appliances >> Hair Straighteners": "Grooming Appliances",
+    "Health & Personal Care Appliances >> Health Care >> Health Care Devices": "Health Devices",
+    "Home & Kitchen >> Kitchen Appliances": "Kitchen Appliances",
+    "Home & Kitchen >> Home Appliances": "Home Appliances",
+    "Kitchen & Dining >> Lighting": "LED Lighting",
+    "Home Improvement >> Electricals": "Electrical Accessories",
+    "Home Entertainment >> Audio Players": "Audio Players",
+    "Computers >> Audio Players": "Audio Players",
+    "Home Entertainment >> Video Players & Accessories >> Video Accessories": "TV & Video Accessories",
 }
 MISSING = {"", "nan", "null", "none", "n/a", "not available", "no rating available"}
 SPEC_TOKEN = re.compile(r'"(?:[^"\\]|\\.)*"(?:\s*=>)?')
