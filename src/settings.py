@@ -38,7 +38,7 @@ CANDIDATE_MULTIPLIER = 4  # fetch extra chunks so per-product de-duplication sti
 INDEX_SCHEMA_VERSION = 1
 
 # Phase 3: grounded answers
-PROMPT_VERSION = "v2"
+PROMPT_VERSION = "v3"
 HISTORY_MESSAGES = 6          # most recent chat messages passed to the LLM (follow-up understanding only)
 # Weak-evidence gate. Deliberately low: Phase 2 notes that MiniLM scores of ~0.3-0.6 are typical, so the
 # score only catches clearly unrelated queries. The prompt's insufficient-evidence rule does the real work.

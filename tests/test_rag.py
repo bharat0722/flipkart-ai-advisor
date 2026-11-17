@@ -13,7 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src import settings  # noqa: E402
-from src.prompts import FALLBACK_MESSAGE, NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_context  # noqa: E402
+from src.prompts import CATALOGUE_SCOPE, FALLBACK_MESSAGE,NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_context  # noqa: E402
 from src.query_understanding import (extract_budget, extract_categories, extract_comparison_targets,  # noqa: E402
                                      extract_connectivity, is_follow_up, understand)
 from src.rag_pipeline import LLMUnavailableError, answer_question  # noqa: E402
@@ -273,6 +273,7 @@ class PipelineTests(unittest.TestCase):
                             client=FakeClient("I can't answer that from the available product data."))
         self.assertFalse(r.grounded)
         self.assertEqual((r.reason, r.cited_product_ids), ("no_support", []))
+        self.assertTrue(r.answer.endswith(CATALOGUE_SCOPE))
 
     def test_only_invented_citations_is_not_grounded(self):
         r = answer_question("router", retriever=FakeRetriever([chunk("P1")]), client=FakeClient("Try [ZZZ]."))

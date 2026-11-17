@@ -15,7 +15,7 @@ import re
 from dataclasses import asdict, dataclass, field
 
 from src import settings
-from src.prompts import FALLBACK_MESSAGE, NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_user_message
+from src.prompts import CATALOGUE_SCOPE, FALLBACK_MESSAGE,NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_user_message
 from src.query_understanding import Constraints, extract_comparison_targets, is_follow_up, understand
 from src.retrieval import RetrievedChunk, Retriever
 
@@ -174,6 +174,8 @@ def answer_question(question: str, history: list[dict] | None = None, *, retriev
     retrieved_ids = {s.product_id for s in sources}
     cited = list(dict.fromkeys(_CITATION.findall(text)))
     valid = [c for c in cited if c in retrieved_ids]
+    if not valid or text.lstrip().startswith("I can't answer that"):  # the model only saw the retrieved products, so state the real catalogue scope ourselves
+        text = f"{text.rstrip()} {CATALOGUE_SCOPE}"
     # An answer that cites no retrieved product is a refusal or an unsupported reply, not a grounded answer.
     return RagResult(
         answer=text, grounded=bool(valid), reason="answered" if valid else "no_support", sources=sources,

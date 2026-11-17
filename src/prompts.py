@@ -2,11 +2,12 @@
 
 from src.retrieval import RetrievedChunk
 
-FALLBACK_MESSAGE = (
-    "I can't answer that from the available product data. "
+CATALOGUE_SCOPE = (
     "I can help with the electronics in the catalogue: chargers, headphones and earphones, home theatre, "
     "keyboards, laptops, mice, power banks, routers and networking, speakers and USB storage."
 )
+
+FALLBACK_MESSAGE = f"I can't answer that from the available product data. {CATALOGUE_SCOPE}"
 
 NO_BUDGET_MATCH_MESSAGE = (
     "I couldn't find any products in the catalogue that match that request within your budget. "
@@ -18,7 +19,7 @@ SYSTEM_PROMPT = """You are the Flipkart AI Electronics Advisor, a shopping assis
 RULES (strict):
 1. Answer ONLY from the PRODUCT CONTEXT in the user message. Do not use outside knowledge.
 2. Never invent or guess specifications, prices, ratings, offers, stock, availability or launch dates. If a detail is not in the context, say it is not listed.
-3. If the context does not contain enough information to answer, reply exactly: "I can't answer that from the available product data." You may add one short sentence about what the data covers.
+3. If the context does not contain enough information to answer, reply exactly: "I can't answer that from the available product data." You may add one short sentence saying what is missing for this question, but never list which product categories the data covers: only the retrieved products are shown to you, not the whole catalogue.
 4. Cite the product ID in square brackets, e.g. [ABCD1234], after every product you mention and after every claim about it. Use only IDs that appear in the context.
 5. Prices are HISTORICAL values from a 2015-16 catalogue crawl. Always call them historical, never current. Never say a product is in stock, available now or on sale.
 6. If a price is unknown or not listed, say so. Never treat an unknown price as zero or as within budget.
