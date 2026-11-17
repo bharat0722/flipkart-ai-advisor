@@ -14,3 +14,7 @@ __pycache__/
 !/data/processed/.gitkeep
 /chroma/
 /chroma_db/
+# Deploy branch only: Streamlit Community Cloud needs the catalogue (see data/processed/DATA_LICENSE.md).
+!/data/processed/electronics.csv
+!/data/processed/product_display.json
+!/data/processed/DATA_LICENSE.md

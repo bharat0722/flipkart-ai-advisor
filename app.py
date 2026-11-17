@@ -42,10 +42,20 @@ st.set_page_config(page_title="Electronics Advisor · Flipkart catalogue", page_
 st.markdown(f"<style>{STYLESHEET.read_text(encoding='utf-8')}</style>", unsafe_allow_html=True)
 
 
-@st.cache_resource(show_spinner="Loading the product index and embedding model...")
+@st.cache_resource(show_spinner="Loading the product index and embedding model (the first start builds the index, "
+                                "about 2 minutes)...")
 def get_retriever() -> Retriever:
-    """Load the embedding model and ChromaDB collection once per server process."""
-    return make_retriever()
+    """Load the embedding model and ChromaDB collection once per server process.
+
+    The deploy branch ships the cleaned CSV but not the index, so a fresh host builds it once here."""
+    try:
+        return make_retriever()
+    except IndexNotReadyError:
+        if not settings.PROCESSED_CSV.exists():
+            raise
+        from scripts.build_index import build_index
+        build_index(settings.PROCESSED_CSV, settings.INDEX_DIR, settings.COLLECTION_NAME)
+        return make_retriever()
 
 
 @st.cache_resource
