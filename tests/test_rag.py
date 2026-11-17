@@ -15,7 +15,7 @@ sys.path.insert(0, str(ROOT))
 from src import settings  # noqa: E402
 from src.prompts import CATALOGUE_SCOPE, FALLBACK_MESSAGE,NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_context  # noqa: E402
 from src.query_understanding import (extract_budget, extract_categories, extract_comparison_targets,  # noqa: E402
-                                     extract_connectivity, is_follow_up, understand)
+                                     extract_connectivity, extract_price_order, is_follow_up, understand)
 from src.rag_pipeline import LLMUnavailableError, answer_question  # noqa: E402
 from src.retrieval import RetrievedChunk  # noqa: E402
 
@@ -93,6 +93,35 @@ class BudgetTests(unittest.TestCase):
         ]:
             with self.subTest(text=text):
                 self.assertEqual(extract_budget(text), (None, expected))
+
+
+class PriceOrderTests(unittest.TestCase):
+    def test_detects_cheapest_and_dearest(self):
+        for text, expected in [("Cheapest speakers you have", "lowest"), ("what is the lowest price router", "lowest"),
+                               ("least expensive laptop", "lowest"), ("most expensive power bank", "highest"),
+                               ("the priciest headphones", "highest"), ("cheap headphones", None),
+                               ("headphones under 500", None)]:
+            with self.subTest(text=text):
+                self.assertEqual(extract_price_order(text), expected)
+
+    def test_cheapest_sorts_by_price_not_similarity(self):
+        pool = [chunk("A", price=900, score=0.9), chunk("B", price=299, score=0.3), chunk("C", price=None, score=0.5),
+                chunk("D", price=450, score=0.6)]
+        retriever = FakeRetriever(pool)
+        r = answer_question("cheapest router", retriever=retriever, client=FakeClient("Try [B]."))
+        self.assertEqual([s.product_id for s in r.sources], ["B", "D", "A"])  # unpriced C dropped
+        self.assertEqual([s.rank for s in r.sources], [1, 2, 3])
+        self.assertEqual(retriever.calls[0][1], settings.PRICE_RANK_POOL)  # whole category considered
+
+    def test_most_expensive_sorts_descending(self):
+        retriever = FakeRetriever([chunk("A", price=100), chunk("B", price=800), chunk("C", price=500)])
+        r = answer_question("most expensive router", retriever=retriever, client=FakeClient("Try [B]."))
+        self.assertEqual([s.product_id for s in r.sources], ["B", "C", "A"])
+
+    def test_note_tells_the_model_the_order(self):
+        client = FakeClient("Try [A].")
+        answer_question("cheapest router", retriever=FakeRetriever([chunk("A", price=100)]), client=client)
+        self.assertIn("sorted lowest price first", client.calls[0]["messages"][-1]["content"])
 
 
 class ConnectivityTests(unittest.TestCase):

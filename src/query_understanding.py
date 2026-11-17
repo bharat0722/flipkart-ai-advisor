@@ -49,10 +49,11 @@ class Constraints:
     min_price: float | None = None
     categories: list[str] = field(default_factory=list)
     connectivity: str | None = None  # "wireless" or "wired" when the question asks for one specifically
+    price_order: str | None = None   # "lowest" or "highest" when the question asks for the cheapest / dearest
 
     def to_dict(self) -> dict:
         return {"max_price": self.max_price, "min_price": self.min_price, "categories": list(self.categories),
-                "connectivity": self.connectivity}
+                "connectivity": self.connectivity, "price_order": self.price_order}
 
     @property
     def has_price_limit(self) -> bool:
@@ -99,10 +100,28 @@ def extract_connectivity(text: str) -> str | None:
     return None
 
 
+_CHEAPEST = re.compile(r"\b(?:cheapest|least expensive|lowest[- ]priced?|lowest (?:price|cost)|most affordable"
+                       r"|most economical|least costly)\b")
+_DEAREST = re.compile(r"\b(?:most expensive|priciest|costliest|highest[- ]priced?|highest (?:price|cost))\b")
+
+
+def extract_price_order(text: str) -> str | None:
+    """'lowest' for "cheapest ...", 'highest' for "most expensive ..."; None otherwise.
+
+    Similarity search cannot rank by price, so the pipeline sorts the filtered candidates itself.
+    """
+    q = text.lower()
+    if _CHEAPEST.search(q):
+        return "lowest"
+    if _DEAREST.search(q):
+        return "highest"
+    return None
+
+
 def understand(question: str) -> Constraints:
     lo, hi = extract_budget(question)
     return Constraints(max_price=hi, min_price=lo, categories=extract_categories(question),
-                       connectivity=extract_connectivity(question))
+                       connectivity=extract_connectivity(question), price_order=extract_price_order(question))
 
 
 def is_follow_up(question: str) -> bool:

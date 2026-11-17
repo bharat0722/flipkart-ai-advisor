@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 # Inputs and outputs
 PROCESSED_CSV = ROOT / "data" / "processed" / "electronics.csv"
+SYNTHETIC_CSV = ROOT / "data" / "synthetic" / "synthetic_electronics.csv"  # labelled invented records (scripts/make_synthetic.py)
 INDEX_DIR = ROOT / "chroma_db"
 MANIFEST_NAME = "index_manifest.json"
 
@@ -33,12 +34,13 @@ CHUNK_OVERLAP = 75       # characters repeated between consecutive windows
 
 # Retrieval
 DEFAULT_TOP_K = 5
+PRICE_RANK_POOL = 200  # products pulled before sorting by price for "cheapest" / "most expensive" questions
 CANDIDATE_MULTIPLIER = 4  # fetch extra chunks so per-product de-duplication still yields k products
 
 INDEX_SCHEMA_VERSION = 1
 
 # Phase 3: grounded answers
-PROMPT_VERSION = "v3"
+PROMPT_VERSION = "v4"
 HISTORY_MESSAGES = 6          # most recent chat messages passed to the LLM (follow-up understanding only)
 # Weak-evidence gate. Deliberately low: Phase 2 notes that MiniLM scores of ~0.3-0.6 are typical, so the
 # score only catches clearly unrelated queries. The prompt's insufficient-evidence rule does the real work.

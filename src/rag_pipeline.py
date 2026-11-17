@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import os
 import re
-from dataclasses import asdict, dataclass, field
+from dataclasses import asdict, dataclass, field, replace
 
 from src import settings
 from src.prompts import CATALOGUE_SCOPE, FALLBACK_MESSAGE,NO_BUDGET_MATCH_MESSAGE, SYSTEM_PROMPT, build_user_message
@@ -94,6 +94,26 @@ def _retrieve_named(targets: list[str], retriever, constraints: Constraints, k: 
     return sources, notes
 
 
+def _retrieve_by_price(search_text: str, retriever, constraints: Constraints, k: int):
+    """Sources for "cheapest ..." / "most expensive ...": filter first, then sort by price, then keep k.
+
+    Similarity ranking knows nothing about price, so asking for the top k by similarity and letting the
+    model pick the cheapest of those misses the real cheapest product. Products with no price are skipped.
+    Returns (sources, note); the note tells the model the list is the genuine extreme, not a sample.
+    """
+    pool = settings.PRICE_RANK_POOL if constraints.categories else k * 6
+    hits = retriever.search(search_text, pool, max_price=constraints.max_price, min_price=constraints.min_price,
+                            categories=constraints.categories or None, connectivity=constraints.connectivity)
+    priced = [h for h in hits if h.price is not None]
+    lowest = constraints.price_order == "lowest"
+    priced.sort(key=lambda h: h.price, reverse=not lowest)
+    chosen = [replace(h, rank=i) for i, h in enumerate(priced[:k], start=1)]
+    word = "lowest" if lowest else "highest"
+    note = (f"These products are the {len(chosen)} with the {word} listed price among the matching products, "
+            f"sorted {word} price first, so the first one is the {'cheapest' if lowest else 'most expensive'}.")
+    return chosen, note
+
+
 def make_client():
     """OpenAI-compatible client configured from the environment. Imported lazily so tests need no key."""
     try:
@@ -141,13 +161,17 @@ def answer_question(question: str, history: list[dict] | None = None, *, retriev
             max_price=constraints.max_price if constraints.has_price_limit else earlier.max_price,
             min_price=constraints.min_price if constraints.has_price_limit else earlier.min_price,
             categories=constraints.categories or earlier.categories,
-            connectivity=constraints.connectivity or earlier.connectivity)
+            connectivity=constraints.connectivity or earlier.connectivity,
+            price_order=constraints.price_order)  # only the current question can ask for the cheapest
     retriever = retriever or Retriever()
     targets = extract_comparison_targets(question)
     notes: list[str] = []
     sources: list[RetrievedChunk] = []
     if targets:
         sources, notes = _retrieve_named(targets, retriever, constraints, k)
+    if not sources and constraints.price_order:
+        sources, order_note = _retrieve_by_price(search_text, retriever, constraints, k)
+        notes.append(order_note)
     if not sources:
         sources = retriever.search(search_text, k, max_price=constraints.max_price, min_price=constraints.min_price,
                                    categories=constraints.categories or None, connectivity=constraints.connectivity)
